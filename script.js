@@ -4,30 +4,42 @@
   /* ---------- Mobile navigation ---------- */
   var navToggle = document.getElementById("navToggle");
   var navLinks = document.getElementById("navLinks");
-  var navCta = document.getElementById("navCta");
 
-  function closeMenu() {
-    navToggle.setAttribute("aria-expanded", "false");
-    navLinks.classList.remove("is-open");
-    navCta.classList.remove("is-open");
+  function setMenu(open) {
+    navToggle.setAttribute("aria-expanded", String(open));
+    navToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    navLinks.classList.toggle("is-open", open);
+    document.body.classList.toggle("nav-open", open);
   }
 
-  if (navToggle) {
+  if (navToggle && navLinks) {
     navToggle.addEventListener("click", function () {
-      var isOpen = navToggle.getAttribute("aria-expanded") === "true";
-      navToggle.setAttribute("aria-expanded", String(!isOpen));
-      navLinks.classList.toggle("is-open");
-      navCta.classList.toggle("is-open");
+      setMenu(navToggle.getAttribute("aria-expanded") !== "true");
     });
 
-    // Close the mobile menu after a nav link is chosen
+    // Close the menu after a link is chosen
     navLinks.querySelectorAll("a").forEach(function (link) {
-      link.addEventListener("click", closeMenu);
+      link.addEventListener("click", function () { setMenu(false); });
     });
 
-    // Close on escape
+    // Close on Escape
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") closeMenu();
+      if (e.key === "Escape" && navLinks.classList.contains("is-open")) {
+        setMenu(false);
+        navToggle.focus();
+      }
+    });
+
+    // Close when tapping outside the header
+    document.addEventListener("click", function (e) {
+      if (navLinks.classList.contains("is-open") && !e.target.closest(".site-header")) {
+        setMenu(false);
+      }
+    });
+
+    // Reset when the window grows to desktop width
+    window.addEventListener("resize", function () {
+      if (window.innerWidth > 1200) setMenu(false);
     });
   }
 
